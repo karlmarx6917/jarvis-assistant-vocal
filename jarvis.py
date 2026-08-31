@@ -14,13 +14,18 @@ import time
 import glob
 import subprocess
 import webbrowser
+from datetime import datetime
 import speech_recognition as sr
+import pyautogui
 
 # ----------------------------------------------------------------------
 # CONFIGURATION
 # ----------------------------------------------------------------------
 
 WAKE_WORD = "jarvis"
+
+# Mots qui arrêtent le mode dictée
+MOTS_STOP_DICTEE = ["arrête", "arrete", "stop"]
 
 # Délai de sécurité (en secondes) avant extinction/redémarrage,
 # pour pouvoir annuler en cas de fausse détection.
@@ -97,6 +102,83 @@ def ouvrir_roblox():
         webbrowser.open("https://www.roblox.com/games")
 
 
+def mode_dictee():
+    """
+    Mode dictée : Jarvis tape en direct tout ce qu'il entend
+    dans la fenêtre actuellement active (Word, Bloc-notes, navigateur...).
+    Dis "stop dictée" pour arrêter.
+    """
+    print("[Dictée] Mode dictée activé. Clique dans la fenêtre où tu veux écrire.")
+    print("[Dictée] Dis 'arrête' ou 'stop' pour arrêter.")
+    time.sleep(2)  # laisse le temps de cliquer dans la bonne fenêtre
+
+    while True:
+        texte = ecouter_et_transcrire(timeout=None, phrase_time_limit=6)
+
+        if texte is None:
+            continue
+
+        texte_minuscule = texte.lower()
+
+        if any(mot in texte_minuscule for mot in MOTS_STOP_DICTEE):
+            print("[Dictée] Mode dictée désactivé.")
+            return
+
+        print(f"[Dictée] Écriture : {texte}")
+        pyautogui.write(texte + " ", interval=0.01)
+
+
+def rechercher_web(requete):
+    print(f"[Action] Recherche web : {requete}")
+    url = "https://www.google.com/search?q=" + requete.replace(" ", "+")
+    webbrowser.open(url)
+
+
+def monter_le_son():
+    print("[Action] Volume augmenté.")
+    for _ in range(5):
+        pyautogui.press("volumeup")
+
+
+def baisser_le_son():
+    print("[Action] Volume baissé.")
+    for _ in range(5):
+        pyautogui.press("volumedown")
+
+
+def couper_le_son():
+    print("[Action] Son coupé/rétabli.")
+    pyautogui.press("volumemute")
+
+
+def musique_pause():
+    print("[Action] Lecture/Pause.")
+    pyautogui.press("playpause")
+
+
+def musique_suivante():
+    print("[Action] Piste suivante.")
+    pyautogui.press("nexttrack")
+
+
+def musique_precedente():
+    print("[Action] Piste précédente.")
+    pyautogui.press("prevtrack")
+
+
+def prendre_screenshot():
+    print("[Action] Capture d'écran...")
+    dossier = os.path.join(os.path.expanduser("~"), "Pictures", "Jarvis_Screenshots")
+    os.makedirs(dossier, exist_ok=True)
+
+    nom_fichier = datetime.now().strftime("screenshot_%Y-%m-%d_%H-%M-%S.png")
+    chemin_complet = os.path.join(dossier, nom_fichier)
+
+    capture = pyautogui.screenshot()
+    capture.save(chemin_complet)
+    print(f"[Action] Screenshot enregistré : {chemin_complet}")
+
+
 def eteindre_pc():
     print(f"[Action] Extinction du PC dans {SHUTDOWN_DELAY} secondes...")
     print("         Dis 'jarvis annule' pour annuler.")
@@ -138,6 +220,14 @@ COMMANDES = [
     (["steam"], ouvrir_steam),
     (["discord"], ouvrir_discord),
     (["roblox"], ouvrir_roblox),
+    (["écris", "ecris", "dictée", "dictee"], mode_dictee),
+    (["screenshot"], prendre_screenshot),
+    (["monte le son", "augmente le son", "plus fort"], monter_le_son),
+    (["baisse le son", "diminue le son", "moins fort"], baisser_le_son),
+    (["coupe le son", "mute", "muet"], couper_le_son),
+    (["piste suivante", "chanson suivante", "musique suivante"], musique_suivante),
+    (["piste précédente", "piste precedente", "chanson précédente", "chanson precedente"], musique_precedente),
+    (["pause", "lecture", "play"], musique_pause),
     (["éteins", "eteins", "shutdown", "arrête le pc", "arrete le pc"], eteindre_pc),
     (["annule", "stop shutdown", "annuler"], annuler_extinction),
     (["redémarre", "redemarre", "restart"], redemarrer_pc),
@@ -148,10 +238,21 @@ COMMANDES = [
 
 def executer_commande(texte):
     """Compare le texte reconnu aux mots-clés et exécute l'action trouvée."""
-    texte = texte.lower()
+    texte_minuscule = texte.lower()
+
+    # Cas spécial : recherche web (il faut récupérer ce qui suit "cherche")
+    for mot_cle in ["cherche", "recherche"]:
+        if mot_cle in texte_minuscule:
+            requete = texte_minuscule.split(mot_cle, 1)[1].strip()
+            if requete:
+                rechercher_web(requete)
+            else:
+                print("[Info] Dis quoi chercher après 'cherche'.")
+            return
+
     for mots_cles, action in COMMANDES:
         for mot in mots_cles:
-            if mot in texte:
+            if mot in texte_minuscule:
                 action()
                 return
     print(f"[Info] Commande non reconnue : '{texte}'")
