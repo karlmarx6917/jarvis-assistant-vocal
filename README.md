@@ -24,8 +24,8 @@ pip install -r requirements.txt
 python -m jarvis
 ```
 
-Au premier lancement, le modèle Whisper est téléchargé une fois (environ 500 Mo pour `small`).
-Sans carte NVIDIA ou si CUDA échoue, Jarvis passe tout seul sur le processeur (plus lent : choisis `base` dans `config.toml`).
+Au premier lancement, le modèle Whisper `large-v3-turbo` est téléchargé une fois (environ 1,6 Go, environ 3 Go de VRAM ensuite). Il convient à une carte de 6 Go.
+Si la VRAM est partagée avec un jeu, ou sans carte NVIDIA, choisis `small` ou `base` dans `config.toml`. Si CUDA échoue, Jarvis passe tout seul sur le processeur (beaucoup plus lent avec `large-v3-turbo`).
 
 ## 🎙️ Utilisation
 
@@ -50,7 +50,7 @@ Les mots sont comparés en mots entiers et sans tenir compte des accents : « di
 
 ## 🔧 Configuration
 
-Tout se règle dans `config.toml` : mot d'activation, modèle Whisper (`tiny` à `large-v3`), périphérique (`auto`, `cuda`, `cpu`), délais, voix, confirmation des extinctions. `log_level = "DEBUG"` affiche tout ce que le micro entend. `python -m jarvis --list-devices` liste les micros.
+Tout se règle dans `config.toml` : mot d'activation, modèle Whisper (`tiny` à `large-v3`, `large-v3-turbo` par défaut), périphérique (`auto`, `cuda`, `cpu`), délais, voix, confirmation des extinctions. `log_level = "DEBUG"` affiche tout ce que le micro entend. `python -m jarvis --list-devices` liste les micros.
 
 Pour ajouter une commande, écris une fonction dans `jarvis/commands.py` et ajoute une ligne `Command(...)` dans la table `COMMANDES`.
 

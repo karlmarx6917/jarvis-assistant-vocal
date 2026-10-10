@@ -197,7 +197,7 @@ def test_config_override_and_unknown_key(tmp_path, caplog):
 
 def test_shipped_config_is_valid():
     cfg = load_config()
-    assert cfg.whisper_model == "small" and cfg.confirm_power_actions is True
+    assert cfg.whisper_model == "large-v3-turbo" and cfg.confirm_power_actions is True
 
 
 def test_config_rejects_bad_threshold():
