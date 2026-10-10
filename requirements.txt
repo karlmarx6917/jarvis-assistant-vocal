@@ -1,3 +1,17 @@
-SpeechRecognition
-pyaudio
-pyautogui
+# Reconnaissance vocale locale (Whisper)
+faster-whisper>=1.1.1,<2
+numpy>=1.26,<3
+sounddevice>=0.5,<0.6
+
+# GPU NVIDIA (CUDA 12). Sans carte NVIDIA, Jarvis retombe sur le CPU.
+nvidia-cublas-cu12>=12,<13; sys_platform == "win32"
+nvidia-cudnn-cu12>=9,<10; sys_platform == "win32"
+
+# Voix, clavier et presse-papiers
+pyttsx3>=2.90,<3
+pyautogui>=0.9.54,<1
+pyperclip>=1.8,<2
+pillow>=10
+
+# Tests
+pytest>=8
