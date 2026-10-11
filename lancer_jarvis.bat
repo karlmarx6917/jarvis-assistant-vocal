@@ -1,4 +1,4 @@
 @echo off
-cd /d C:\Jarvis
-py -3.11 jarvis.py
+cd /d "%~dp0"
+py -3.11 -m jarvis
 pause

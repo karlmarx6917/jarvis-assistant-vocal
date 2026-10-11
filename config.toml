@@ -1,0 +1,29 @@
+# Réglages de Jarvis. Toutes les clés sont facultatives.
+
+wake_word = "jarvis"
+wake_threshold = 0.75          # tolérance de reconnaissance du mot d'activation (0 à 1)
+language = "fr"
+
+# --- Whisper ---
+whisper_model = "large-v3-turbo"  # tiny, base, small, medium, large-v3-turbo (~3 Go de VRAM), large-v3
+device = "auto"                # auto (GPU si possible), cuda, cpu
+compute_type = "auto"          # auto = float16 sur GPU, int8 sur CPU
+
+# --- Micro ---
+silence_ms = 700               # silence qui termine une phrase
+min_speech_ms = 250            # phrases plus courtes ignorées (bruits)
+max_phrase_s = 15
+command_timeout_s = 6          # attente de la commande après "Jarvis"
+dictation_idle_s = 30          # la dictée s'arrête après ce silence
+stop_words = ["arrête", "stop", "termine"]
+
+# --- Actions ---
+shutdown_delay = 10
+confirm_power_actions = true   # demande confirmation avant extinction / redémarrage
+# screenshot_dir = "C:/Users/moi/Pictures/Jarvis_Screenshots"
+
+# --- Voix ---
+speak = true
+tts_rate = 185
+
+log_level = "INFO"             # DEBUG affiche tout ce que le micro entend

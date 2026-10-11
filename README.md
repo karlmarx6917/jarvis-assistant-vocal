@@ -1,120 +1,85 @@
 # 🤖 Jarvis - Assistant vocal local pour Windows
 
-Assistant vocal 100% gratuit et local, écrit en Python. Dis "Jarvis" suivi d'une commande pour ouvrir des applications, contrôler ton PC, dicter du texte, et plus encore — sans API payante, sans limite d'utilisation.
+Assistant vocal en Python. Dis « Jarvis » puis une commande : il ouvre des applications, contrôle le PC et le son, dicte du texte et te répond à voix haute en français.
+
+**Tout reste sur ton PC.** La reconnaissance vocale utilise [Whisper](https://github.com/SYSTRAN/faster-whisper) en local (carte NVIDIA recommandée). Aucun son n'est envoyé sur internet, sauf pour la recherche web que tu demandes.
 
 ## ✨ Fonctionnalités
 
-**Ouverture d'applications**
-- Chrome, Spotify, YouTube, Bloc-notes, Explorateur de fichiers
-- Steam, Discord, Roblox
-
-**Contrôle du PC**
-- Éteindre / Redémarrer (avec délai de sécurité + annulation possible)
-- Verrouiller / Mettre en veille
-
-**Contrôle média**
-- Monter / baisser / couper le son
-- Lecture / pause, piste suivante / précédente
-
-**Autres**
-- 📸 Capture d'écran vocale ("Jarvis screenshot")
-- ✍️ Dictée vocale : Jarvis tape en direct ce que tu dis, dans n'importe quelle fenêtre active
-- 🔍 Recherche web instantanée ("Jarvis cherche...")
-
-## 🛠️ Technologies utilisées
-
-- **Python 3.11**
-- **SpeechRecognition** — reconnaissance vocale (via Google Web Speech API, gratuite)
-- **PyAudio** — capture du micro
-- **PyAutoGUI** — simulation clavier/souris pour la dictée, les screenshots et le contrôle média
+- **Applications** : Chrome, Spotify, YouTube, Bloc-notes, Explorateur, Steam, Discord, Roblox
+- **PC** : éteindre / redémarrer (avec confirmation orale, délai et annulation), verrouiller, veille
+- **Média** : volume, lecture/pause, piste suivante/précédente
+- **Dictée** : Jarvis tape ce que tu dis dans la fenêtre active, accents compris
+- **Recherche web** et **capture d'écran**
+- **Réponses vocales** en français
 
 ## 📦 Installation
 
-### 1. Prérequis
-- Python 3.11 installé ([python.org](https://www.python.org/downloads/))
-- Un micro fonctionnel
+Prérequis : Windows, Python 3.11 ou plus, un micro, idéalement une carte NVIDIA avec un pilote à jour. Une voix française doit être installée dans Windows (Paramètres > Heure et langue > Voix).
 
-### 2. Cloner le projet
 ```bash
-git clone https://github.com/ton-pseudo/jarvis-assistant-vocal.git
+git clone https://github.com/karlmarx6917/jarvis-assistant-vocal.git
 cd jarvis-assistant-vocal
-```
-
-### 3. Installer les dépendances
-```bash
 pip install -r requirements.txt
+python -m jarvis
 ```
 
-> 💡 Si l'installation de `pyaudio` échoue sous Windows :
-> ```bash
-> pip install pipwin
-> pipwin install pyaudio
-> ```
-
-### 4. Lancer Jarvis
-```bash
-python jarvis.py
-```
+Au premier lancement, le modèle Whisper `large-v3-turbo` est téléchargé une fois (environ 1,6 Go, environ 3 Go de VRAM ensuite). Il convient à une carte de 6 Go.
+Si la VRAM est partagée avec un jeu, ou sans carte NVIDIA, choisis `small` ou `base` dans `config.toml`. Si CUDA échoue, Jarvis passe tout seul sur le processeur (beaucoup plus lent avec `large-v3-turbo`).
 
 ## 🎙️ Utilisation
 
-Dis simplement **"Jarvis"** suivi d'une commande, en une seule phrase ou en deux temps :
-
 ```
-"Jarvis ouvre chrome"
+"Jarvis, ouvre Chrome"                (une phrase)
+"Jarvis" → "Oui ?" → "monte le son"   (deux temps)
 ```
-ou
-```
-"Jarvis"  →  (attends "Oui ? Je t'écoute...")  →  "ouvre chrome"
-```
-
-### Liste des commandes
 
 | Commande vocale | Action |
 |---|---|
-| `ouvre chrome / spotify / youtube / bloc-notes / explorateur` | Ouvre l'application |
-| `ouvre steam / discord / roblox` | Ouvre l'application |
-| `écris` / `dictée` | Active le mode dictée vocale (dire "stop" ou "arrête" pour arrêter) |
-| `cherche [quelque chose]` | Lance une recherche Google |
-| `screenshot` | Prend une capture d'écran |
-| `monte le son` / `baisse le son` / `coupe le son` | Contrôle du volume |
-| `pause` | Lecture / pause de la musique |
-| `piste suivante` / `piste précédente` | Navigation musicale |
-| `verrouille` | Verrouille le PC |
-| `veille` | Met le PC en veille |
-| `éteins` | Éteint le PC (délai de 10s) |
-| `redémarre` | Redémarre le PC (délai de 10s) |
-| `annule` | Annule une extinction/redémarrage en cours |
+| `chrome`, `spotify`, `youtube`, `bloc-notes`, `explorateur`, `steam`, `discord`, `roblox` | Ouvre l'application |
+| `cherche [sujet]` | Recherche Google |
+| `écris` / `dictée` | Dictée, dis « stop » ou « arrête » pour finir |
+| `screenshot` | Capture d'écran |
+| `monte le son`, `baisse le son`, `coupe le son` | Volume |
+| `pause`, `piste suivante`, `piste précédente` | Musique |
+| `verrouille`, `veille` | Verrouille / met en veille |
+| `éteins`, `redémarre` | Demande confirmation (dis « oui »), puis délai de 10 s |
+| `annule` | Annule une extinction ou un redémarrage |
 
-## 🚀 Lancement automatique au démarrage de Windows
+Les mots sont comparés en mots entiers et sans tenir compte des accents : « display » ne déclenche plus « play ».
 
-Un fichier `lancer_jarvis.bat` est inclus. Pour que Jarvis se lance à chaque démarrage de ton PC :
+## 🔧 Configuration
 
-1. Place `lancer_jarvis.bat` dans le même dossier que `jarvis.py`
-2. Ouvre le dossier de démarrage Windows : `Windows + R` → tape `shell:startup`
-3. Copie un raccourci de `lancer_jarvis.bat` dans ce dossier
+Tout se règle dans `config.toml` : mot d'activation, modèle Whisper (`tiny` à `large-v3`, `large-v3-turbo` par défaut), périphérique (`auto`, `cuda`, `cpu`), délais, voix, confirmation des extinctions. `log_level = "DEBUG"` affiche tout ce que le micro entend. `python -m jarvis --list-devices` liste les micros.
 
-## 🔧 Personnalisation
+Pour ajouter une commande, écris une fonction dans `jarvis/commands.py` et ajoute une ligne `Command(...)` dans la table `COMMANDES`.
 
-Toutes les commandes sont centralisées dans la liste `COMMANDES` du fichier `jarvis.py`. Pour ajouter une nouvelle commande, il suffit d'ajouter une fonction et une ligne dans cette liste :
+## 🧱 Structure
 
-```python
-def ma_nouvelle_action():
-    print("[Action] Faire quelque chose...")
-    # ton code ici
-
-COMMANDES = [
-    # ...
-    (["mon mot-clé"], ma_nouvelle_action),
-]
+```
+jarvis/
+  audio.py     micro + découpage en phrases
+  stt.py       Whisper (GPU, repli CPU)
+  tts.py       voix française
+  matcher.py   texte -> commande (logique pure)
+  commands.py  actions et table des commandes
+  app.py       boucle principale
+  config.py    lecture de config.toml
+tests/         pytest, sans micro ni GPU
 ```
 
-## ⚠️ Limitations connues
+Tests : `python -m pytest`
 
-- Nécessite une connexion internet (utilise l'API de reconnaissance vocale de Google)
-- La reconnaissance vocale peut être imprécise avec un accent marqué, du bruit de fond, ou des noms propres peu communs
-- Testé uniquement sur Windows
+## 🚀 Lancement au démarrage de Windows
+
+`lancer_jarvis.bat` fonctionne depuis n'importe quel dossier. Ajoute-en un raccourci dans `shell:startup` (touche Windows + R).
+
+## ⚠️ Limites
+
+- Windows uniquement pour les actions système
+- Le mot « Jarvis » est détecté par Whisper : chaque phrase est transcrite en local, ce qui utilise un peu le GPU en continu
+- Dans une pièce très bruyante ou avec la télé allumée, de fausses détections restent possibles
 
 ## 📄 Licence
 
-Projet personnel, libre d'utilisation et de modification.
+MIT, voir `LICENSE`.
